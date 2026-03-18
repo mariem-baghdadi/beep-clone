@@ -1,18 +1,7 @@
 // app/dashboard/ajouter/page.tsx
-import { redirect } from 'next/navigation'
-import AjouterProduitForm from './AjouterProduitForm'
 import { createClient } from '@/lib/supabase/server'
-
-// Catégories prédéfinies (peuvent être déplacées dans un fichier partagé)
-const categories = [
-  'Fruits & Légumes',
-  'Viandes & Poissons',
-  'Produits laitiers',
-  'Épicerie',
-  'Boissons',
-  'Surgelés',
-  'Autre'
-]
+import { redirect } from 'next/navigation'
+import AjouterProduitForm from '@/components/AjouterProduitForm'  // ← Changé : components (avec s)
 
 export default async function AjouterProduitPage() {
   const supabase = await createClient()
@@ -37,7 +26,7 @@ export default async function AjouterProduitPage() {
     const name = formData.get('name') as string
     const barcode = formData.get('barcode') as string || null
     const expiry_date = formData.get('expiry_date') as string
-    const category = formData.get('category') as string
+    const category_id = formData.get('category_id') as string
     const notes = formData.get('notes') as string || null
 
     const { error } = await supabase
@@ -46,7 +35,7 @@ export default async function AjouterProduitPage() {
         name,
         barcode,
         expiry_date,
-        category,
+        category_id: parseInt(category_id),
         notes,
         user_id: user.id
       })
@@ -59,10 +48,5 @@ export default async function AjouterProduitPage() {
     redirect('/dashboard')
   }
 
-  return (
-    <AjouterProduitForm 
-      addProduct={addProduct}
-      categories={categories}
-    />
-  )
+  return <AjouterProduitForm addProduct={addProduct} />
 }

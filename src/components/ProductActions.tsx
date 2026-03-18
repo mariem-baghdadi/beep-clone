@@ -1,8 +1,9 @@
-// app/dashboard/ProductActions.tsx
+// components/ProductActions.tsx
 'use client'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 interface Props {
   productId: number
@@ -10,28 +11,31 @@ interface Props {
 
 export default function ProductActions({ productId }: Props) {
   const router = useRouter()
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.preventDefault()
+  const handleDelete = async () => {
+    if (!confirm('Supprimer ce produit ?')) return
     
-    if (!confirm('Supprimer ce produit ?')) {
-      return
-    }
-
+    setIsDeleting(true)
+    
     try {
-      // Appeler la route de suppression
-      const response = await fetch(`/dashboard/supprimer/${productId}`, {
-        method: 'GET',
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'DELETE',
       })
-      
+
+      const data = await response.json()
+
       if (response.ok) {
-        // Rafraîchir les données sans recharger la page
+        // Rafraîchir la page pour voir les changements
         router.refresh()
       } else {
-        console.error('Erreur suppression')
+        alert(data.error || 'Erreur lors de la suppression')
       }
     } catch (error) {
       console.error('Erreur:', error)
+      alert('Erreur de connexion')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -46,9 +50,10 @@ export default function ProductActions({ productId }: Props) {
       <span className="text-gray-300">|</span>
       <button
         onClick={handleDelete}
-        className="text-red-600 hover:underline"
+        disabled={isDeleting}
+        className="text-red-600 hover:underline disabled:opacity-50"
       >
-        Supprimer
+        {isDeleting ? 'Suppression...' : 'Supprimer'}
       </button>
     </div>
   )
