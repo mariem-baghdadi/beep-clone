@@ -15,11 +15,18 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // Le middleware gérera la mise à jour des cookies
+            cookiesToSet.forEach(({ name, value, options }) => {
+              // Force les options pour la production
+              cookieStore.set(name, value, {
+                ...options,
+                secure: true,
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 60 * 60 * 24 * 7,
+              })
+            })
+          } catch (error) {
+            console.error('❌ Erreur setAll cookies:', error)
           }
         },
       },
