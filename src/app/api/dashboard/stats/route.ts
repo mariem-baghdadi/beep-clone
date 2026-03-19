@@ -37,7 +37,7 @@ export async function GET() {
 
     // Compter par catégorie
     const categoryCount: Record<string, number> = {}
-    products?.forEach(p => {
+    products?.forEach((p: any) => {
       const catName = p.categories?.name || 'Autre'
       categoryCount[catName] = (categoryCount[catName] || 0) + 1
     })
@@ -47,24 +47,24 @@ export async function GET() {
       .sort((a, b) => b.count - a.count)
 
     // Compter les produits expirés
-    const expiredCount = products?.filter(p => 
+    const expiredCount = products?.filter((p: any) => 
       new Date(p.expiry_date) < today
     ).length || 0
 
     // Compter les produits qui expirent aujourd'hui
-    const expiringToday = products?.filter(p => {
+    const expiringToday = products?.filter((p: any) => {
       const date = new Date(p.expiry_date)
       return date.toDateString() === today.toDateString()
     }).length || 0
 
     // Compter cette semaine (hors aujourd'hui)
-    const expiringThisWeek = products?.filter(p => {
+    const expiringThisWeek = products?.filter((p: any) => {
       const date = new Date(p.expiry_date)
       return date > today && date <= in7Days
     }).length || 0
 
     // Compter semaine prochaine
-    const expiringNextWeek = products?.filter(p => {
+    const expiringNextWeek = products?.filter((p: any) => {
       const date = new Date(p.expiry_date)
       return date > in7Days && date <= in14Days
     }).length || 0
@@ -73,10 +73,10 @@ export async function GET() {
     const nextDays: Record<string, any[]> = {}
     
     products
-      ?.filter(p => new Date(p.expiry_date) >= today)
-      .sort((a, b) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime())
+      ?.filter((p: any) => new Date(p.expiry_date) >= today)
+      .sort((a: any, b: any) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime())
       .slice(0, 10)
-      .forEach(p => {
+      .forEach((p: any) => {
         const dateStr = p.expiry_date
         if (!nextDays[dateStr]) {
           nextDays[dateStr] = []

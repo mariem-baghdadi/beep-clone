@@ -29,7 +29,7 @@ export default async function CategoriesPage() {
     .select('category_id')
 
   const productCount: Record<number, number> = {}
-  products?.forEach(p => {
+  products?.forEach((p: { category_id: number }) => {
     if (p.category_id) {
       productCount[p.category_id] = (productCount[p.category_id] || 0) + 1
     }
