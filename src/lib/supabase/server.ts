@@ -16,7 +16,6 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              // Force les options pour la production
               cookieStore.set(name, value, {
                 ...options,
                 secure: true,
@@ -26,7 +25,7 @@ export async function createClient() {
               })
             })
           } catch (error) {
-            console.error('❌ Erreur setAll cookies:', error)
+            // Le middleware gérera
           }
         },
       },

@@ -3,8 +3,11 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+  // Créer UNE SEULE réponse qu'on va utiliser partout
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
   });
 
   const supabase = createServerClient(
@@ -16,49 +19,47 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          // IMPORTANT: Options adaptées à la production
-          const cookieOptions = {
+          // Appliquer les cookies à la FOIS à la requête ET à la réponse
+          request.cookies.set({
             name,
             value,
             ...options,
-            secure: true,                 // Obligatoire en HTTPS
-            sameSite: "lax",               // Nécessaire pour les redirects
-            httpOnly: false,                // Accessible par le JS
+            secure: true,
+            sameSite: "lax",
             path: "/",
-            maxAge: 60 * 60 * 24 * 7,       // 7 jours
-            domain: process.env.NODE_ENV === "production" 
-              ? ".vercel.app"                // Adapte à ton domaine
-              : undefined,
-          };
-
-          request.cookies.set(cookieOptions);
-          supabaseResponse.cookies.set(cookieOptions);
+            maxAge: 60 * 60 * 24 * 7,
+          });
+          
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 7,
+          });
         },
         remove(name: string, options: any) {
           request.cookies.set({
             name,
             value: "",
             ...options,
-            secure: true,
-            sameSite: "lax",
             path: "/",
             maxAge: 0,
           });
-          supabaseResponse.cookies.set({
+          response.cookies.set({
             name,
             value: "",
             ...options,
-            secure: true,
-            sameSite: "lax",
             path: "/",
             maxAge: 0,
           });
         },
       },
-    },
+    }
   );
-console.log('🔍 Cookies présents:', request.cookies.getAll().map(c => c.name))
-console.log('🔍 URL:', request.url)
+
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user && !request.nextUrl.pathname.startsWith("/auth")) {
@@ -67,5 +68,5 @@ console.log('🔍 URL:', request.url)
     return NextResponse.redirect(url);
   }
 
-  return supabaseResponse;
+  return response;
 }
